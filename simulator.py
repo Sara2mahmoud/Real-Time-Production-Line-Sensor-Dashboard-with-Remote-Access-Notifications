@@ -14,7 +14,7 @@ if len(sys.argv) > 1:
     except ValueError:
         pass
 
-SENSORS = {
+SENSOR_LIMITS = {
     "TEMP_1": {"low": 20, "high": 80},
     "TEMP_2": {"low": 25, "high": 75},
     "PRESS_1": {"low": 1.0, "high": 5.0},
@@ -22,12 +22,40 @@ SENSORS = {
     "SPEED_1": {"low": 500, "high": 1500},
 }
 
+SENSOR_COLORS = {
+    "OK": "#b6fcd5",
+    "WARN": "#fff59d",
+    "ALARM": "#ff8a80"
+}
+
+
+def find_free_port(preferred=9000, host='127.0.0.1'):
+    """Try to use the preferred port if available, otherwise return an ephemeral free port.
+    Returns the chosen port number or None if binding was not possible (e.g., permissions/firewall)."""
+    # First try preferred port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((host, preferred))
+        s.close()
+        return preferred
+    except OSError:
+        try:
+            # Let OS pick an ephemeral port
+            s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s2.bind((host, 0))
+            port = s2.getsockname()[1]
+            s2.close()
+            return port
+        except OSError:
+            return None
+
 def generate_sensor_value(sensor):
-    limits = SENSORS[sensor]
+    limits = SENSOR_LIMITS[sensor]
     value = random.uniform(limits["low"], limits["high"])
 
     # 10% chance to exceed limits
-    if random.random() < 0.1:
+    if random.random() < 0.05:
         value *= random.choice([0.5, 1.5])
 
     # 5% chance sensor is faulty
@@ -71,7 +99,7 @@ def start_simulator(host=HOST, port=PORT, stop_event=None):
 
             try:
                 while not stop_event.is_set():
-                    for sensor in SENSORS:
+                    for sensor in SENSOR_LIMITS:
                         value, status = generate_sensor_value(sensor)
 
                         packet = {

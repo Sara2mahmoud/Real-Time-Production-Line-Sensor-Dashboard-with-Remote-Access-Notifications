@@ -3,7 +3,7 @@ import json
 import threading
 import time
 
-from simulator import start_simulator, SENSORS
+from simulator import start_simulator, SENSOR_LIMITS
 
 
 def run_simulator_test():
@@ -65,7 +65,7 @@ def run_simulator_test():
             print(f"[ERROR] Field '{field}' is missing")
 
     sensor = packet.get("sensor")
-    if sensor in SENSORS:
+    if sensor in SENSOR_LIMITS:
         print(f"[OK] Sensor name '{sensor}' is valid")
     else:
         print(f"[WARNING] Unknown sensor name: {sensor}")

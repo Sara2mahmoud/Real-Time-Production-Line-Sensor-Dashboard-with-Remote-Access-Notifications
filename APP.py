@@ -17,42 +17,7 @@ import subprocess
 import sys
 import os
 import socket
-
-SENSOR_LIMITS = {
-    "TEMP_1": {"low": 20, "high": 80},
-    "TEMP_2": {"low": 25, "high": 75},
-    "PRESS_1": {"low": 1.0, "high": 5.0},
-    "VIB_1": {"low": 0.1, "high": 3.0},
-    "SPEED_1": {"low": 500, "high": 1500},
-}
-
-SENSOR_COLORS = {
-    "OK": "#b6fcd5",
-    "WARN": "#fff59d",
-    "ALARM": "#ff8a80"
-}
-
-
-def find_free_port(preferred=9000, host='127.0.0.1'):
-    """Try to use the preferred port if available, otherwise return an ephemeral free port.
-    Returns the chosen port number or None if binding was not possible (e.g., permissions/firewall)."""
-    # First try preferred port
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((host, preferred))
-        s.close()
-        return preferred
-    except OSError:
-        try:
-            # Let OS pick an ephemeral port
-            s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s2.bind((host, 0))
-            port = s2.getsockname()[1]
-            s2.close()
-            return port
-        except OSError:
-            return None
+from simulator import SENSOR_LIMITS, SENSOR_COLORS, find_free_port
 
 class SensorDashboard(tk.Tk):
     def __init__(self, data_queue, alarm_manager, client):
@@ -203,7 +168,6 @@ class SensorDashboard(tk.Tk):
         cmd_frame.pack(pady=5)
         tk.Button(cmd_frame, text="Restart Sensor Simulator", command=self.restart_simulator).pack(side=tk.LEFT, padx=5)
         tk.Button(cmd_frame, text="Request Detailed Snapshot", command=self.request_snapshot).pack(side=tk.LEFT, padx=5)
-        tk.Button(cmd_frame, text="Send Test Notification", command=lambda: self.send_test_notification()).pack(side=tk.LEFT, padx=5)
         tk.Button(cmd_frame, text="Clear Alarms", command=self.clear_alarms).pack(side=tk.LEFT, padx=5)
 
         # (Bonus) Event Streaming Placeholder
