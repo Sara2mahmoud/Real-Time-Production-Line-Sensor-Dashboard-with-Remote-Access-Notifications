@@ -1,4 +1,4 @@
-# Sensor Dashboard (Si-Ware Assessment)
+# Sensor Dashboard 
 
 ✅ This repository contains a simple sensor dashboard application with a built-in sensor simulator, TCP client, alarm manager, and notification handlers.
 
